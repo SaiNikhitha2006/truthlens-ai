@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Layers, Eye, Sliders, Maximize2, Split } from 'lucide-react';
+import { Layers, Eye, Sliders, Split, Sparkles, Activity } from 'lucide-react';
 
 interface ImageSplitViewProps {
   originalUrl: string;
@@ -7,6 +7,8 @@ interface ImageSplitViewProps {
   spectralUrl: string;
   elaDiffUrl?: string;
   blendedUrl?: string;
+  prnuNoiseUrl?: string;
+  chromaUrl?: string;
 }
 
 export const ImageSplitView: React.FC<ImageSplitViewProps> = ({
@@ -14,15 +16,19 @@ export const ImageSplitView: React.FC<ImageSplitViewProps> = ({
   elaHeatmapUrl,
   spectralUrl,
   elaDiffUrl,
-  blendedUrl
+  blendedUrl,
+  prnuNoiseUrl,
+  chromaUrl
 }) => {
   const [viewMode, setViewMode] = useState<'split_slider' | 'side_by_side' | 'blend_slider'>('split_slider');
-  const [activeLayer, setActiveLayer] = useState<'ela' | 'spectral' | 'diff'>('ela');
-  const [sliderPosition, setSliderPosition] = useState<number>(50); // percentage 0-100
+  const [activeLayer, setActiveLayer] = useState<'ela' | 'spectral' | 'prnu' | 'chroma' | 'diff'>('ela');
+  const [sliderPosition, setSliderPosition] = useState<number>(50);
   const [blendOpacity, setBlendOpacity] = useState<number>(0.65);
 
   const getOverlayImage = () => {
-    if (activeLayer === 'spectral') return spectralUrl;
+    if (activeLayer === 'spectral') return spectralUrl || elaHeatmapUrl;
+    if (activeLayer === 'prnu' && prnuNoiseUrl) return prnuNoiseUrl;
+    if (activeLayer === 'chroma' && chromaUrl) return chromaUrl;
     if (activeLayer === 'diff') return elaDiffUrl || elaHeatmapUrl;
     return elaHeatmapUrl;
   };
@@ -30,12 +36,12 @@ export const ImageSplitView: React.FC<ImageSplitViewProps> = ({
   const overlayUrl = getOverlayImage();
 
   return (
-    <div className="flex flex-col rounded-2xl bg-slate-deep/80 border border-slate-border p-5 shadow-xl">
+    <div className="flex flex-col rounded-2xl bg-slate-deep/80 border border-slate-border p-5 shadow-xl space-y-3">
       {/* View Mode Header Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-border/80">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-border/80">
         <div className="flex items-center space-x-2">
           <Layers className="w-5 h-5 text-cyan" />
-          <h3 className="text-base font-semibold text-white">Forensic Split-View Inspection</h3>
+          <h3 className="text-base font-semibold text-white">Forensic Split-View Inspection Console</h3>
         </div>
 
         {/* View mode toggle pills */}
@@ -78,10 +84,10 @@ export const ImageSplitView: React.FC<ImageSplitViewProps> = ({
         </div>
       </div>
 
-      {/* Layer Selector */}
-      <div className="flex items-center justify-between py-3 text-xs">
-        <div className="flex items-center space-x-2">
-          <span className="text-gray-400 font-medium">Comparison Layer:</span>
+      {/* Layer Selector Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-2 py-1 text-xs">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-gray-400 font-medium mr-1">Layer:</span>
           <button
             onClick={() => setActiveLayer('ela')}
             className={`px-2.5 py-1 rounded-md transition font-medium ${
@@ -90,7 +96,7 @@ export const ImageSplitView: React.FC<ImageSplitViewProps> = ({
                 : 'bg-navy/60 text-gray-400 hover:text-gray-200'
             }`}
           >
-            ELA Turbo Heatmap
+            ELA Heatmap
           </button>
           <button
             onClick={() => setActiveLayer('spectral')}
@@ -102,6 +108,30 @@ export const ImageSplitView: React.FC<ImageSplitViewProps> = ({
           >
             2D FFT Frequency
           </button>
+          {prnuNoiseUrl && (
+            <button
+              onClick={() => setActiveLayer('prnu')}
+              className={`px-2.5 py-1 rounded-md transition font-medium ${
+                activeLayer === 'prnu'
+                  ? 'bg-cyan/20 text-cyan border border-cyan/40'
+                  : 'bg-navy/60 text-gray-400 hover:text-gray-200'
+              }`}
+            >
+              PRNU Sensor Noise
+            </button>
+          )}
+          {chromaUrl && (
+            <button
+              onClick={() => setActiveLayer('chroma')}
+              className={`px-2.5 py-1 rounded-md transition font-medium ${
+                activeLayer === 'chroma'
+                  ? 'bg-cyan/20 text-cyan border border-cyan/40'
+                  : 'bg-navy/60 text-gray-400 hover:text-gray-200'
+              }`}
+            >
+              YCbCr Chrominance
+            </button>
+          )}
           {elaDiffUrl && (
             <button
               onClick={() => setActiveLayer('diff')}
@@ -116,10 +146,9 @@ export const ImageSplitView: React.FC<ImageSplitViewProps> = ({
           )}
         </div>
 
-        {/* Dynamic Controls based on viewMode */}
         {viewMode === 'blend_slider' && (
           <div className="flex items-center space-x-2">
-            <span className="text-gray-400 text-xs">Heatmap Opacity:</span>
+            <span className="text-gray-400 text-xs">Opacity:</span>
             <input
               type="range"
               min="0"
@@ -186,7 +215,7 @@ export const ImageSplitView: React.FC<ImageSplitViewProps> = ({
 
             {/* Labels */}
             <div className="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-navy/85 border border-cyan/40 text-[11px] font-semibold text-cyan z-10 pointer-events-none">
-              {activeLayer.toUpperCase()} OVERLAY ({Math.round(sliderPosition)}%)
+              {activeLayer.toUpperCase()} FORENSIC LAYER ({Math.round(sliderPosition)}%)
             </div>
             <div className="absolute top-3 right-3 px-2.5 py-1 rounded-md bg-navy/85 border border-slate-border text-[11px] font-semibold text-gray-300 z-10 pointer-events-none">
               ORIGINAL ASSET
@@ -217,13 +246,11 @@ export const ImageSplitView: React.FC<ImageSplitViewProps> = ({
 
         {viewMode === 'blend_slider' && (
           <div className="relative w-full h-[460px] flex items-center justify-center">
-            {/* Base: Original */}
             <img
               src={originalUrl}
               alt="Original"
               className="absolute inset-0 w-full h-full object-contain"
             />
-            {/* Blended Layer */}
             <img
               src={overlayUrl}
               alt="Forensic Overlay"

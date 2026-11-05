@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ForensicAnalysisResult } from '../types';
+import { ForensicAnalysisResult, ElaResult } from '../types';
 import { 
   ShieldCheck, 
   Share2, 
@@ -14,14 +14,22 @@ import {
   Sparkles,
   Sliders,
   CheckCircle2,
-  Lock
+  Lock,
+  Printer,
+  ExternalLink,
+  Compass
 } from 'lucide-react';
 import { TrustScoreGauge } from '../components/TrustScoreGauge';
 import { ImageSplitView } from '../components/ImageSplitView';
 import { ElaVisualizer } from '../components/ElaVisualizer';
 import { SpectralVisualizer } from '../components/SpectralVisualizer';
 import { PreShareModal } from '../components/PreShareModal';
+import { FacialForensicsCard } from '../components/FacialForensicsCard';
+import { CopyMoveVisualizer } from '../components/CopyMoveVisualizer';
+import { InteractiveForensicsTuner } from '../components/InteractiveForensicsTuner';
+import { PrintCertificateModal } from '../components/PrintCertificateModal';
 import { api } from '../services/api';
+import { audioCues } from '../components/AudioCues';
 
 interface ReportDetailsPageProps {
   result: ForensicAnalysisResult;
@@ -30,11 +38,12 @@ interface ReportDetailsPageProps {
 }
 
 export const ReportDetailsPage: React.FC<ReportDetailsPageProps> = ({
-  result,
-  onBack,
-  onSubmitToCommunity
+  result: initialResult,
+  onBack
 }) => {
+  const [result, setResult] = useState<ForensicAnalysisResult>(initialResult);
   const [isPreShareOpen, setIsPreShareOpen] = useState<boolean>(false);
+  const [isCertificateOpen, setIsCertificateOpen] = useState<boolean>(false);
   const [isSubmittingReport, setIsSubmittingReport] = useState<boolean>(false);
   const [reportSuccess, setReportSuccess] = useState<string | null>(null);
   const [platformSelect, setPlatformSelect] = useState<string>('X/Twitter');
@@ -46,7 +55,16 @@ export const ReportDetailsPage: React.FC<ReportDetailsPageProps> = ({
   const handleCopySha = () => {
     navigator.clipboard.writeText(result.sha256);
     setCopiedSha(true);
+    audioCues.playSuccessTone();
     setTimeout(() => setCopiedSha(false), 2000);
+  };
+
+  const handleElaUpdated = (newEla: ElaResult) => {
+    setResult(prev => ({
+      ...prev,
+      ela: newEla
+    }));
+    audioCues.playScanTone();
   };
 
   const handleDownloadReport = () => {
@@ -83,6 +101,7 @@ export const ReportDetailsPage: React.FC<ReportDetailsPageProps> = ({
     a.download = `truelens_forensic_report_${result.sha256.substring(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
+    audioCues.playSuccessTone();
   };
 
   const handleCommunitySubmit = async (e: React.FormEvent) => {
@@ -99,6 +118,7 @@ export const ReportDetailsPage: React.FC<ReportDetailsPageProps> = ({
         thumbnail_url: result.original_preview
       });
       setReportSuccess('Report successfully submitted to Community Governance Network!');
+      audioCues.playSuccessTone();
       setTimeout(() => {
         setIsSubmittingReport(false);
         setReportSuccess(null);
@@ -121,9 +141,23 @@ export const ReportDetailsPage: React.FC<ReportDetailsPageProps> = ({
         </button>
 
         {/* Action Bar */}
-        <div className="flex items-center space-x-2.5">
+        <div className="flex flex-wrap items-center gap-2.5">
           <button
-            onClick={() => setIsPreShareOpen(true)}
+            onClick={() => {
+              setIsCertificateOpen(true);
+              audioCues.playScanTone();
+            }}
+            className="px-3.5 py-2 rounded-xl bg-cyan hover:bg-cyan-hover text-navy-dark text-xs font-bold flex items-center space-x-1.5 transition shadow-glow-cyan"
+          >
+            <Printer className="w-3.5 h-3.5" />
+            <span>Official Certificate</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setIsPreShareOpen(true);
+              audioCues.playWarningTone();
+            }}
             className="px-3.5 py-2 rounded-xl bg-red-950/70 hover:bg-red-900/80 border border-red-700 text-red-200 text-xs font-semibold flex items-center space-x-1.5 transition shadow-sm"
           >
             <Share2 className="w-3.5 h-3.5" />
@@ -143,7 +177,7 @@ export const ReportDetailsPage: React.FC<ReportDetailsPageProps> = ({
             className="px-3.5 py-2 rounded-xl bg-electric hover:bg-electric-hover text-white text-xs font-semibold flex items-center space-x-1.5 transition shadow-glow-electric"
           >
             <Download className="w-3.5 h-3.5" />
-            <span>Export Forensic JSON</span>
+            <span>Export JSON Dossier</span>
           </button>
         </div>
       </div>
@@ -187,7 +221,7 @@ export const ReportDetailsPage: React.FC<ReportDetailsPageProps> = ({
         <div className="lg:col-span-2 flex flex-col justify-between p-6 rounded-2xl bg-slate-deep/70 border border-slate-border space-y-4">
           <div>
             <h3 className="text-base font-semibold text-white">Forensic Provenance & Multi-Layer Audit</h3>
-            <p className="text-xs text-gray-400 mt-0.5">Composite assessment across five forensic dimensions</p>
+            <p className="text-xs text-gray-400 mt-0.5">Composite assessment across multi-spectral dimensions</p>
           </div>
 
           {/* Breakdown progress bars */}
@@ -299,20 +333,88 @@ export const ReportDetailsPage: React.FC<ReportDetailsPageProps> = ({
         </div>
       </div>
 
-      {/* Interactive Split View: Original vs ELA vs FFT Spectrum */}
+      {/* Interactive Live Forensic Tuner */}
+      <InteractiveForensicsTuner
+        originalImageBase64={result.original_preview}
+        currentEla={result.ela}
+        onElaUpdated={handleElaUpdated}
+      />
+
+      {/* Interactive Split View: Original vs ELA vs FFT Spectrum vs PRNU vs Chroma */}
       <ImageSplitView
         originalUrl={result.original_preview}
         elaHeatmapUrl={result.ela.heatmap_image_base64}
         spectralUrl={result.spectral.spectrum_image_base64}
         elaDiffUrl={result.ela.diff_image_base64}
         blendedUrl={result.ela.blended_image_base64}
+        prnuNoiseUrl={result.prnu?.noise_map_base64}
+        chromaUrl={result.chrominance?.chroma_heatmap_base64}
       />
+
+      {/* Deep Dives: Facial Forensics & Copy-Move Cloning */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <FacialForensicsCard data={result.facial_forensics} />
+        <CopyMoveVisualizer data={result.copymove} />
+      </div>
 
       {/* Side by Side Deep Dives: ELA Analysis & FFT Spectral Analysis */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ElaVisualizer ela={result.ela} />
         <SpectralVisualizer spectral={result.spectral} />
       </div>
+
+      {/* External Reverse Image Lookup Bar */}
+      <div className="p-5 rounded-2xl bg-slate-deep/70 border border-slate-border flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div className="flex items-center space-x-2">
+          <Compass className="w-4 h-4 text-cyan" />
+          <span className="font-semibold text-white">External Reverse Provenance Search Engines:</span>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <a
+            href="https://lens.google.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3 py-1.5 rounded-lg bg-navy hover:bg-slate-hover text-gray-300 hover:text-white border border-slate-border flex items-center space-x-1 transition"
+          >
+            <span>Google Lens</span>
+            <ExternalLink className="w-3 h-3 text-cyan" />
+          </a>
+          <a
+            href="https://tineye.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3 py-1.5 rounded-lg bg-navy hover:bg-slate-hover text-gray-300 hover:text-white border border-slate-border flex items-center space-x-1 transition"
+          >
+            <span>TinEye</span>
+            <ExternalLink className="w-3 h-3 text-cyan" />
+          </a>
+          <a
+            href="https://yandex.com/images"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3 py-1.5 rounded-lg bg-navy hover:bg-slate-hover text-gray-300 hover:text-white border border-slate-border flex items-center space-x-1 transition"
+          >
+            <span>Yandex Visual</span>
+            <ExternalLink className="w-3 h-3 text-cyan" />
+          </a>
+          <a
+            href="https://contentauthenticity.org"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3 py-1.5 rounded-lg bg-navy hover:bg-slate-hover text-cyan border border-slate-border flex items-center space-x-1 transition"
+          >
+            <span>C2PA Manifest</span>
+            <ExternalLink className="w-3 h-3" />
+          </a>
+        </div>
+      </div>
+
+      {/* Official Printable Forensic Certificate Modal */}
+      <PrintCertificateModal
+        isOpen={isCertificateOpen}
+        onClose={() => setIsCertificateOpen(false)}
+        result={result}
+      />
 
       {/* Pre-Share Intercept Modal */}
       <PreShareModal

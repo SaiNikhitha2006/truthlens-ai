@@ -1,6 +1,7 @@
-import React from 'react';
-import { Shield, Radio, Search, Activity, Users, ShieldAlert, Cpu, Bell } from 'lucide-react';
+import React, { useState } from 'react';
+import { Shield, Radio, Search, Activity, Users, ShieldAlert, Cpu, Bell, Volume2, VolumeX } from 'lucide-react';
 import { GlobalAlert } from '../types';
+import { audioCues } from './AudioCues';
 
 interface NavbarProps {
   activeTab: string;
@@ -9,7 +10,20 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, alerts }) => {
+  const [audioEnabled, setAudioEnabled] = useState<boolean>(true);
   const criticalCount = alerts.filter(a => a.severity === 'CRITICAL').length;
+
+  const toggleAudio = () => {
+    const next = !audioEnabled;
+    setAudioEnabled(next);
+    audioCues.enabled = next;
+    if (next) audioCues.playSuccessTone();
+  };
+
+  const handleNavClick = (tab: string) => {
+    audioCues.playScanTone();
+    setActiveTab(tab);
+  };
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-border bg-navy/90 backdrop-blur-md">
@@ -17,7 +31,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, alerts 
         <div className="flex items-center justify-between h-16">
           {/* Logo & Brand */}
           <div 
-            onClick={() => setActiveTab('home')}
+            onClick={() => handleNavClick('home')}
             className="flex items-center space-x-3 cursor-pointer group"
           >
             <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-electric to-cyan shadow-glow-electric group-hover:scale-105 transition-transform">
@@ -36,7 +50,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, alerts 
           {/* Navigation Items */}
           <nav className="hidden md:flex items-center space-x-1">
             <button
-              onClick={() => setActiveTab('home')}
+              onClick={() => handleNavClick('home')}
               className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-1.5 ${
                 activeTab === 'home'
                   ? 'bg-slate-deep text-cyan shadow-inner'
@@ -48,7 +62,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, alerts 
             </button>
 
             <button
-              onClick={() => setActiveTab('scan')}
+              onClick={() => handleNavClick('scan')}
               className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-1.5 ${
                 activeTab === 'scan'
                   ? 'bg-slate-deep text-cyan shadow-inner'
@@ -60,7 +74,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, alerts 
             </button>
 
             <button
-              onClick={() => setActiveTab('community')}
+              onClick={() => handleNavClick('community')}
               className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-1.5 ${
                 activeTab === 'community'
                   ? 'bg-slate-deep text-cyan shadow-inner'
@@ -72,7 +86,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, alerts 
             </button>
 
             <button
-              onClick={() => setActiveTab('admin')}
+              onClick={() => handleNavClick('admin')}
               className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-1.5 ${
                 activeTab === 'admin'
                   ? 'bg-slate-deep text-cyan shadow-inner'
@@ -84,7 +98,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, alerts 
             </button>
 
             <button
-              onClick={() => setActiveTab('partners')}
+              onClick={() => handleNavClick('partners')}
               className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-1.5 ${
                 activeTab === 'partners'
                   ? 'bg-slate-deep text-cyan shadow-inner'
@@ -96,7 +110,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, alerts 
             </button>
 
             <button
-              onClick={() => setActiveTab('notifications')}
+              onClick={() => handleNavClick('notifications')}
               className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-1.5 relative ${
                 activeTab === 'notifications'
                   ? 'bg-slate-deep text-cyan shadow-inner'
@@ -111,11 +125,20 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, alerts 
             </button>
           </nav>
 
-          {/* Quick CTA and Live Signal */}
+          {/* Quick CTA, Audio Toggle, and Live Signal */}
           <div className="flex items-center space-x-3">
+            {/* Audio Toggle Button */}
+            <button
+              onClick={toggleAudio}
+              className="p-2 rounded-lg bg-navy hover:bg-slate-hover text-gray-400 hover:text-cyan border border-slate-border transition"
+              title={audioEnabled ? "Mute Cybernetic Audio" : "Unmute Audio Cues"}
+            >
+              {audioEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4 text-gray-500" />}
+            </button>
+
             {criticalCount > 0 && (
               <div 
-                onClick={() => setActiveTab('notifications')}
+                onClick={() => handleNavClick('notifications')}
                 className="hidden sm:flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-red-950/60 border border-red-500/40 text-red-300 text-xs cursor-pointer hover:bg-red-900/60 transition"
               >
                 <Radio className="w-3.5 h-3.5 text-red-400 animate-pulse" />
@@ -124,7 +147,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, alerts 
             )}
 
             <button
-              onClick={() => setActiveTab('scan')}
+              onClick={() => handleNavClick('scan')}
               className="px-4 py-2 rounded-lg bg-gradient-to-r from-electric to-blue-600 hover:from-blue-600 hover:to-electric text-white text-sm font-semibold shadow-glow-electric transition-all transform hover:-translate-y-0.5 active:translate-y-0"
             >
               Analyze Media

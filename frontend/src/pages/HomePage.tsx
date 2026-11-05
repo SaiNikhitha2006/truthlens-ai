@@ -14,9 +14,14 @@ import {
   Database,
   Radio,
   Lock,
-  Sparkles
+  Sparkles,
+  TrendingDown,
+  Compass
 } from 'lucide-react';
 import { ReportCard } from '../components/ReportCard';
+import { SocialFeedExtensionSim } from '../components/SocialFeedExtensionSim';
+import { ViralTrajectoryChart } from '../components/ViralTrajectoryChart';
+import { audioCues } from '../components/AudioCues';
 
 interface HomePageProps {
   stats: SystemStats;
@@ -56,12 +61,15 @@ export const HomePage: React.FC<HomePageProps> = ({
           </h1>
 
           <p className="text-gray-300 text-base sm:text-lg leading-relaxed">
-            True Lens AI combines Error Level Analysis (ELA), 2D Fourier spectral decomposition, and bilateral platform APIs to detect deepfakes, calculate viral velocity, and intercept misinformation before it cascades across networks.
+            True Lens AI combines Error Level Analysis (ELA), 2D Fourier spectral decomposition, copy-move detection, and bilateral platform APIs to detect deepfakes, calculate viral velocity, and intercept misinformation before it cascades across networks.
           </p>
 
           <div className="flex flex-wrap items-center gap-4 pt-2">
             <button
-              onClick={() => setActiveTab('scan')}
+              onClick={() => {
+                audioCues.playScanTone();
+                setActiveTab('scan');
+              }}
               className="px-6 py-3 rounded-xl bg-gradient-to-r from-electric to-blue-600 hover:from-blue-600 hover:to-electric text-white font-semibold text-sm shadow-glow-electric flex items-center space-x-2 transition-all transform hover:-translate-y-0.5"
             >
               <Search className="w-4 h-4" />
@@ -69,7 +77,10 @@ export const HomePage: React.FC<HomePageProps> = ({
             </button>
 
             <button
-              onClick={() => setActiveTab('community')}
+              onClick={() => {
+                audioCues.playScanTone();
+                setActiveTab('community');
+              }}
               className="px-6 py-3 rounded-xl bg-slate-deep hover:bg-slate-hover text-gray-200 border border-slate-border font-semibold text-sm flex items-center space-x-2 transition"
             >
               <Users className="w-4 h-4 text-cyan" />
@@ -134,6 +145,11 @@ export const HomePage: React.FC<HomePageProps> = ({
             </span>
           </div>
         </div>
+      </section>
+
+      {/* In-Situ Social Extension Simulation Demo */}
+      <section>
+        <SocialFeedExtensionSim />
       </section>
 
       {/* Five Circulation Reduction Mechanisms Overview */}
@@ -202,6 +218,11 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
       </section>
 
+      {/* Viral Velocity Dissemination Model */}
+      <section>
+        <ViralTrajectoryChart />
+      </section>
+
       {/* Recent High-Velocity Outbreaks Feed */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
@@ -214,7 +235,10 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           <button
-            onClick={() => setActiveTab('community')}
+            onClick={() => {
+              audioCues.playScanTone();
+              setActiveTab('community');
+            }}
             className="text-xs font-semibold text-cyan hover:underline flex items-center space-x-1"
           >
             <span>View All Reports</span>

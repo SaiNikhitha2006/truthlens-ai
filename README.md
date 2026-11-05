@@ -1,15 +1,13 @@
-# True Lens AI – Detect, Verify, Prevent
+# True Lens AI – Detect, Verify, Prevent (v2.0)
 
 **True Lens AI** is an advanced digital forensics platform designed to detect synthetic AI-generated imagery, face-swaps, and localized pixel tampering, verify authentic provenance, and mitigate viral misinformation across social platforms through cryptographic fingerprinting and community governance.
 
 ---
 
-## 🔬 Core Forensics & AI Detection Engine
-
-True Lens AI employs a multi-spectral forensic stack to evaluate images without relying solely on opaque, easily bypassed black-box classifiers:
+## 🔬 Multi-Spectral Forensic Engine
 
 1. **Error Level Analysis (ELA)**:
-   - Resaves uploaded media at a standardized 90% JPEG quality matrix.
+   - Resaves uploaded media at a standardized 90% JPEG quality matrix (or custom dynamic quality via the Live Tuner).
    - Calculates absolute differences between the original and recompressed frames.
    - Extracts localized block-wise variance ($\sigma_{\text{var}}$) across $32 \times 32$ tiles.
    - Renders dual visualization overlays: **Turbo Colormap Heatmap** and **Spatial Grayscale Blend** to pinpoint spliced text, edited logos, or inpainting boundaries.
@@ -19,12 +17,21 @@ True Lens AI employs a multi-spectral forensic stack to evaluate images without 
    - Computes Azimuthal radial power profiles to compare decay curves against natural optical sensor $1/f$ power laws.
    - Identifies periodic high-frequency checkerboard peaks resulting from transposed convolution or pixel deconvolution layers in GANs (StyleGAN) and Latent Diffusion decoders.
 
-3. **Face & Manipulation Anomaly Engine**:
-   - **Sensor Noise Residue (PRNU)**: Analyzes high-pass residuals across spatial quadrants to verify uniform camera sensor noise.
-   - **Edge & Blur Consistency**: Computes Laplacian variance across gradient boundaries to flag soft synthetic skin smoothing vs. sharp natural optical backgrounds.
-   - **Metadata & EXIF Audit**: Inspects hardware tags, camera makes, and known generative AI tool signatures.
+3. **Facial Boundary & Landmark Seam Forensics**:
+   - Isolates facial skin-tone ROIs in YCrCb color space.
+   - Measures boundary transition gradient ratios to catch Poisson blending / FaceSwap alpha feathering around the jawline.
+   - Computes iris & specular reflection highlight symmetry to expose synthetic hyper-symmetry.
 
-4. **Composite Trust Score (0–100)**:
+4. **Copy-Move Forgery Detection (CMFD)**:
+   - Uses ORB feature keypoint matching with spatial Euclidean distance thresholding and displacement vector clustering to highlight cloned, duplicated, or stamped regions.
+
+5. **PRNU Sensor Noise Residual Prints**:
+   - Extracts 2D Photo-Response Non-Uniformity (PRNU) camera sensor noise residue using high-pass filtering to verify camera hardware consistency.
+
+6. **Color Space & Chrominance Forensics**:
+   - Decomposes YCbCr and LAB channels to detect chrominance edge discrepancies and color bleeding from neural latent decoders.
+
+7. **Composite Trust Score (0–100)**:
    - $100$: Pristine, authentic optical photograph.
    - $0$: High-confidence synthetic AI generation or spliced tampering.
    - Categorized into: `LOW_RISK`, `SUSPICIOUS`, `HIGH_RISK_MANIPULATED`, or `AI_GENERATED` with explicit 94%+ confidence intervals.
@@ -43,22 +50,21 @@ True Lens AI employs a multi-spectral forensic stack to evaluate images without 
 
 ---
 
-## 🎨 UI & Design Architecture
+## 🌟 Upgraded v2.0 Features & Capabilities
 
-- **Theme**: Professional Cybersecurity Dark Mode
-  - **Navy Primary**: `#0b132b`
-  - **Deep Slate**: `#1c2541`
-  - **Electric Blue**: `#3a86ff`
-  - **Cyan Accent**: `#4cc9f0`
-- **Interactive Forensic Split-View**:
-  - Drag-to-wipe horizontal split slider
-  - Side-by-side comparison mode
-  - Alpha blend overlay with real-time opacity controls
-- **Interactive Dashboards**:
-  - Live system stats ticker and critical outbreak alerts
-  - 1-Click Forensic Benchmark sample images (Authentic, AI-Generated, Doctored Document)
-  - Interactive Recharts Azimuthal frequency profile chart
-  - Admin governance and triage console
+- **Live Forensic Parameter Tuner**:
+  - Interactive sliders for JPEG Quality ($50\% - 98\%$) and Contrast Multiplier ($5\times - 45\times$).
+  - Live colormap switcher (Turbo, Jet, Inferno, Viridis, Bone, Ocean).
+- **Official Printable Forensic Verification Certificate**:
+  - Full-featured tamper-proof certificate with QR code simulation, SHA-256 seal, Trust Index, and 1-click `Print / Save as PDF` (`window.print()`).
+- **In-Situ Social Feed Warning Badge Simulator**:
+  - Interactive demonstration showing how True Lens partner APIs intercept viral posts on X/Twitter, Reddit, and Instagram feeds with warning overlays.
+- **Viral Velocity Dissemination Model**:
+  - Recharts area projection model comparing unmitigated viral explosion vs. True Lens friction containment curves over 24 hours.
+- **Cybernetic Sound Cues**:
+  - Web Audio API synthesizer for scan chirps, anomaly alerts, and verified tones with mute toggle.
+- **External Reverse Search Engines**:
+  - Direct 1-click launchers for Google Lens, TinEye, Yandex Visual Search, and C2PA Content Authenticity Manifests.
 
 ---
 
@@ -91,76 +97,3 @@ npm install
 npm run dev
 ```
 - Web Application: [http://localhost:5173](http://localhost:5173)
-
----
-
-## 📁 Repository Directory Structure
-
-```
-true-lens-ai/
-├── backend/
-│   ├── app/
-│   │   ├── __init__.py
-│   │   ├── main.py              # FastAPI app with CORS and v1 router bindings
-│   │   ├── config.py            # Platform configuration and CORS settings
-│   │   ├── api/
-│   │   │   └── v1/
-│   │   │       ├── forensics.py # Image upload, URL analyze, sample benchmarks
-│   │   │       ├── moderation.py# Check-hash and flag endpoints for partner platforms
-│   │   │       ├── reports.py   # Community reporting & duplicate tracking
-│   │   │       ├── partners.py  # Partner platform credentials and webhook dispatch
-│   │   │       ├── alerts.py    # Global outbreak alerts & topic subscriptions
-│   │   │       └── stats.py     # Real-time metrics and aggregates
-│   │   ├── core/
-│   │   │   ├── ela.py           # 90% JPEG quality Error Level Analysis & Turbo Heatmaps
-│   │   │   ├── spectral.py      # 2D Fast Fourier Transform & Azimuthal radial profile
-│   │   │   ├── anomaly.py       # PRNU noise variance, Laplacian edges, Trust Score
-│   │   │   ├── hasher.py        # SHA-256 and 64-bit DCT pHash (Hamming distance)
-│   │   │   └── samples.py       # Programmatic forensic benchmark samples
-│   │   └── db/
-│   │       ├── database.py      # JSON-backed persistent database engine
-│   │       ├── models.py        # Pydantic data schemas
-│   │       └── seed.py          # Pre-seeded viral disinfo reports and partners
-│   ├── requirements.txt
-│   └── run.py
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── Navbar.tsx            # Sticky navigation with live outbreak badge
-│   │   │   ├── Footer.tsx            # Standards, disclaimers, and cryptographic notes
-│   │   │   ├── TrustScoreGauge.tsx   # Dynamic SVG needle gauge (0-100) & risk pill
-│   │   │   ├── ImageSplitView.tsx    # Wipe split, side-by-side, and blend viewer
-│   │   │   ├── ElaVisualizer.tsx     # ELA colormap, delta metrics, block variance
-│   │   │   ├── SpectralVisualizer.tsx# 2D FFT map + Recharts Azimuthal curve
-│   │   │   ├── PreShareModal.tsx     # Mandatory pre-share friction intercept dialog
-│   │   │   ├── SampleImagePicker.tsx # 1-Click benchmark sample selector
-│   │   │   ├── ReportCard.tsx        # Clustered duplicate card with viral velocity
-│   │   │   └── AlertBadge.tsx        # Severity pill
-│   │   ├── pages/
-│   │   │   ├── HomePage.tsx          # Platform overview, stats, mechanism architecture
-│   │   │   ├── ScanPage.tsx          # Drag-and-drop file / URL forensic scanner
-│   │   │   ├── ReportDetailsPage.tsx # Multi-spectral verification dossier & export
-│   │   │   ├── CommunityFeedPage.tsx # Flagged feed & platform reporting guides
-│   │   │   ├── AdminPortalPage.tsx   # Triage queue, webhook dispatch, DB sync
-│   │   │   ├── PartnerApiPage.tsx    # Interactive endpoint tester & partner setup
-│   │   │   └── NotificationsPage.tsx # Outbreak alerts & specialized subscriptions
-│   │   ├── services/
-│   │   │   └── api.ts               # Typed REST API service connector
-│   │   ├── types/
-│   │   │   └── index.ts             # TypeScript definitions
-│   │   ├── App.tsx                  # Core state controller & router
-│   │   ├── main.tsx
-│   │   └── index.css                # Tailwind directives & dark theme styling
-│   ├── package.json
-│   ├── vite.config.ts
-│   ├── tailwind.config.js
-│   └── tsconfig.json
-├── start.bat
-├── start.ps1
-└── README.md
-```
-
----
-
-## ⚖️ Open Governance & Ethical Compliance Notice
-True Lens AI operates under decentralized open verification standards. Unpartnered third-party platforms cannot be forcibly altered without bilateral API agreements and cryptographic trust federation.
