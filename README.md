@@ -1,4 +1,4 @@
-# True Lens AI – Detect, Verify, Prevent (v2.0)
+# Truth Lens AI – Detect, Verify, Prevent (v2.0)
 
 **True Lens AI** is an advanced digital forensics platform designed to detect synthetic AI-generated imagery, face-swaps, and localized pixel tampering, verify authentic provenance, and mitigate viral misinformation across social platforms through cryptographic fingerprinting and community governance.
 
