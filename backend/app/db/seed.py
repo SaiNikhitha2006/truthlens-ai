@@ -1,0 +1,237 @@
+import json
+from datetime import datetime, timezone
+
+INITIAL_DATA = {
+    "moderation_hashes": [
+        {
+            "id": "hash_tl_001",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "phash": "f0e1d2c3b4a59687",
+            "title": "Doctored Press Conference - Deepfake State Official",
+            "category": "deepfake_impersonation",
+            "risk_level": "AI_GENERATED",
+            "trust_score": 12,
+            "status": "CONFIRMED_MANIPULATED",
+            "source_platform": "X/Twitter",
+            "viral_count": 14280,
+            "reported_at": "2026-11-04T14:20:00Z",
+            "verified_by": "Senior Forensic Analyst [TrueLens Team]",
+            "notes": "GAN-generated face swap superimposed over existing broadcast footage. Evident spectral grid artifacts and lack of ocular micro-tremors.",
+            "thumbnail_url": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80"
+        },
+        {
+            "id": "hash_tl_002",
+            "sha256": "4a7d1ed414474e4033ac29ccb8653d9b02fe38f123a1a9e9a4e3fa3f5cf79a4b",
+            "phash": "a1b2c3d4e5f60718",
+            "title": "Fabricated Central Bank Crisis Statement",
+            "category": "financial_fraud",
+            "risk_level": "HIGH_RISK_MANIPULATED",
+            "trust_score": 24,
+            "status": "CONFIRMED_MANIPULATED",
+            "source_platform": "Reddit",
+            "viral_count": 8940,
+            "reported_at": "2026-11-05T09:12:00Z",
+            "verified_by": "Financial Disinfo Taskforce",
+            "notes": "Text splicing into official PDF letterhead image. ELA shows extreme compression divergence around monetary figures.",
+            "thumbnail_url": "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=400&q=80"
+        },
+        {
+            "id": "hash_tl_003",
+            "sha256": "9b105d0016ecc44e69fbe9102a3725b436414f9d411f387d47212a4b8e27a613",
+            "phash": "3c4d5e6f7a8b9c0d",
+            "title": "Synthetic AI Influencer Identity Fraud",
+            "category": "synthetic_avatar",
+            "risk_level": "AI_GENERATED",
+            "trust_score": 18,
+            "status": "CONFIRMED_MANIPULATED",
+            "source_platform": "Instagram",
+            "viral_count": 23410,
+            "reported_at": "2026-11-03T18:45:00Z",
+            "verified_by": "Automated Spectral Pipeline",
+            "notes": "Latent diffusion generated portrait with characteristic frequency plateau and iris asymmetry.",
+            "thumbnail_url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80"
+        },
+        {
+            "id": "hash_tl_004",
+            "sha256": "1c7a8b9f2d3e4c5b6a7890123456789abcdef0123456789abcdef0123456789a",
+            "phash": "7f8e9d0c1b2a3b4c",
+            "title": "AI Disaster Imagery - Flooded Landmark Splicing",
+            "category": "breaking_news_disinfo",
+            "risk_level": "HIGH_RISK_MANIPULATED",
+            "trust_score": 28,
+            "status": "CONFIRMED_MANIPULATED",
+            "source_platform": "Facebook",
+            "viral_count": 31200,
+            "reported_at": "2026-11-02T11:30:00Z",
+            "verified_by": "GeoForensics Lead",
+            "notes": "Generative water reflection composited onto historical photo; lighting gradient directions completely disjoint.",
+            "thumbnail_url": "https://images.unsplash.com/photo-1547683905-f686c993aae5?auto=format&fit=crop&w=400&q=80"
+        }
+    ],
+    "reports": [
+        {
+            "id": "rep_101",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "phash": "f0e1d2c3b4a59687",
+            "title": "Deepfake video screenshot of senator announcing currency freeze",
+            "platform": "X/Twitter",
+            "post_url": "https://x.com/disinfo_watch/status/18842109283719",
+            "reason": "deepfake_impersonation",
+            "evidence_text": "Lip-sync mismatches and blurring around jawline visible upon pausing. The senator was attending a live hearing at the same timestamp.",
+            "reporter_handle": "@ForensicHawk_OSINT",
+            "status": "confirmed_manipulated",
+            "duplicate_count": 48,
+            "viral_velocity_score": 94,
+            "velocity_tier": "EXPLOSIVE",
+            "created_at": "2026-11-05T12:00:00Z",
+            "updated_at": "2026-11-05T14:30:00Z",
+            "moderator_notes": "Corroborated by AP fact-check dispatch. Confirmed GAN-based face puppet manipulation.",
+            "thumbnail_url": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80"
+        },
+        {
+            "id": "rep_102",
+            "sha256": "4a7d1ed414474e4033ac29ccb8653d9b02fe38f123a1a9e9a4e3fa3f5cf79a4b",
+            "phash": "a1b2c3d4e5f60718",
+            "title": "Altered government audit report circulating in finance subreddit",
+            "platform": "Reddit",
+            "post_url": "https://reddit.com/r/investing/comments/audit_memo_leak",
+            "reason": "financial_fraud",
+            "evidence_text": "Font kerning on row 4 does not match Helvetica Neue used by Treasury department; compression artifacts around deficit numbers are sharper than background.",
+            "reporter_handle": "u/AuditEagle_Verified",
+            "status": "confirmed_manipulated",
+            "duplicate_count": 19,
+            "viral_velocity_score": 76,
+            "velocity_tier": "HIGH",
+            "created_at": "2026-11-05T15:20:00Z",
+            "updated_at": "2026-11-05T16:10:00Z",
+            "moderator_notes": "Official release confirms authentic version had 4.2% instead of doctored 24.2%.",
+            "thumbnail_url": "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=400&q=80"
+        },
+        {
+            "id": "rep_103",
+            "sha256": "8f3b2c1a0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a",
+            "phash": "5a6b7c8d9e0f1a2b",
+            "title": "Viral photograph of non-existent cyclone storm damage over downtown",
+            "platform": "Facebook",
+            "post_url": "https://facebook.com/groups/weatheralertsnow/posts/89127391",
+            "reason": "synthetic_disinformation",
+            "evidence_text": "Clouds exhibit characteristic Midjourney v6 swirling surrealism; vehicle tires blend seamlessly into asphalt without physical contact shadows.",
+            "reporter_handle": "MeteorologyFactCheckGroup",
+            "status": "under_review",
+            "duplicate_count": 31,
+            "viral_velocity_score": 83,
+            "velocity_tier": "HIGH",
+            "created_at": "2026-11-05T19:40:00Z",
+            "updated_at": "2026-11-05T20:15:00Z",
+            "moderator_notes": "Initial ELA shows zero sensor PRNU; awaiting confirmation from regional Doppler radar logs.",
+            "thumbnail_url": "https://images.unsplash.com/photo-1547683905-f686c993aae5?auto=format&fit=crop&w=400&q=80"
+        },
+        {
+            "id": "rep_104",
+            "sha256": "3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c",
+            "phash": "1122334455667788",
+            "title": "Synthetic AI avatar operating romance scam account network",
+            "platform": "Instagram",
+            "post_url": "https://instagram.com/p/synthetic_elena_model",
+            "reason": "synthetic_avatar",
+            "evidence_text": "Earrings do not match between ears; background bokeh contains unnatural repetitive fractal patterns.",
+            "reporter_handle": "@ScamSleuthGlobal",
+            "status": "pending",
+            "duplicate_count": 8,
+            "viral_velocity_score": 45,
+            "velocity_tier": "MODERATE",
+            "created_at": "2026-11-05T21:05:00Z",
+            "updated_at": "2026-11-05T21:05:00Z",
+            "moderator_notes": "Queued for human moderation triage.",
+            "thumbnail_url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80"
+        }
+    ],
+    "partners": [
+        {
+            "id": "part_tw_01",
+            "name": "X / Twitter Trust & Safety API",
+            "api_key": "tl_partner_live_8f93a2c091be4f",
+            "webhook_url": "https://api.twitter.com/2/compliance/factcheck/truelens-webhook",
+            "is_active": True,
+            "total_queries": 458920,
+            "flags_submitted": 1284,
+            "last_sync": "2026-11-05T21:10:00Z"
+        },
+        {
+            "id": "part_meta_02",
+            "name": "Meta Content Oversight Bridge",
+            "api_key": "tl_partner_meta_77c19a022b",
+            "webhook_url": "https://graph.meta.internal/moderation/truelens_sync",
+            "is_active": True,
+            "total_queries": 892340,
+            "flags_submitted": 2350,
+            "last_sync": "2026-11-05T21:08:00Z"
+        },
+        {
+            "id": "part_rd_03",
+            "name": "Reddit Anti-Evil Operations Dispatch",
+            "api_key": "tl_partner_reddit_34ab889ef",
+            "webhook_url": "https://oauth.reddit.com/api/v1/truelens/flag_ingest",
+            "is_active": True,
+            "total_queries": 174500,
+            "flags_submitted": 680,
+            "last_sync": "2026-11-05T20:55:00Z"
+        },
+        {
+            "id": "part_cons_04",
+            "name": "Global Fact-Checkers Network (IFCN)",
+            "api_key": "tl_partner_ifcn_900ff12e",
+            "webhook_url": "https://factcheck.org/webhooks/truelens-alerts",
+            "is_active": True,
+            "total_queries": 63200,
+            "flags_submitted": 412,
+            "last_sync": "2026-11-05T20:30:00Z"
+        }
+    ],
+    "alerts": [
+        {
+            "id": "alt_001",
+            "title": "URGENT: Deepfake audio/image press conference circulating on X & Telegram",
+            "category": "deepfakes",
+            "severity": "CRITICAL",
+            "message": "A hyper-realistic synthetic video screenshot falsely depicting a banking regulator announcing deposit caps has achieved viral velocity (>14k shares/hr). SHA-256 fingerprint verified.",
+            "report_id": "rep_101",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "viral_velocity": 94,
+            "created_at": "2026-11-05T13:00:00Z",
+            "platforms_affected": ["X/Twitter", "Telegram", "TikTok"]
+        },
+        {
+            "id": "alt_002",
+            "title": "ALERT: Doctored Treasury Deficit Memorandum on Social Media",
+            "category": "financial_fraud",
+            "severity": "HIGH",
+            "message": "Altered document graphic with spliced percentage values is circulating in finance communities. ELA forensic verification shows clear localized compression discrepancy.",
+            "report_id": "rep_102",
+            "sha256": "4a7d1ed414474e4033ac29ccb8653d9b02fe38f123a1a9e9a4e3fa3f5cf79a4b",
+            "viral_velocity": 76,
+            "created_at": "2026-11-05T16:30:00Z",
+            "platforms_affected": ["Reddit", "LinkedIn", "Facebook"]
+        },
+        {
+            "id": "alt_003",
+            "title": "SYNTHETIC ADVISORY: Coordinated Midjourney Storm Disaster Campaign",
+            "category": "breaking_news",
+            "severity": "WARNING",
+            "message": "AI-generated flood imagery targeting municipal emergency response handles. Spectral analysis reveals prominent 2D FFT frequency deconvolution spikes.",
+            "report_id": "rep_103",
+            "sha256": "8f3b2c1a0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a",
+            "viral_velocity": 83,
+            "created_at": "2026-11-05T20:20:00Z",
+            "platforms_affected": ["Facebook", "Instagram"]
+        }
+    ],
+    "stats": {
+        "scans_completed": 128490,
+        "flagged_assets": 4812,
+        "global_alerts_active": 3,
+        "hash_database_size": 24900,
+        "viral_interceptions_today": 3420,
+        "partner_queries_24h": 146950
+    }
+}
