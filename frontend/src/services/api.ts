@@ -1,3 +1,4 @@
+
 import {
   ForensicAnalysisResult,
   CommunityReport,
@@ -8,7 +9,8 @@ import {
   ElaResult
 } from '../types';
 
-const API_BASE = `${(process.env.VITE_API_URL || 'http://127.0.0.1:8000').replace(/\/$/, '')}/api/v1`;
+// Vite environment variable configuration
+const API_BASE = `${(import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000').replace(/\/$/, '')}/api/v1`;
 
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
